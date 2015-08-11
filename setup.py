@@ -1,22 +1,22 @@
 """
-Flask-S3
+Flask-S3-Custom
 -------------
+Link S3 to your file. Based on flask-s3 by e-dard
 
-Easily serve your static files from Amazon S3.
 """
 from setuptools import setup
 
 
 setup(
-    name='Flask-S3',
-    version='0.1.7',
-    url='http://github.com/e-dard/flask-s3',
+    name='Flask-S3-Custom',
+    version='0.0.1',
+    url='http://github.com/yuerany/flask-s3-custom',
     license='WTFPL',
-    author='Edward Robinson',
-    author_email='hi@edd.io',
-    description='Seamlessly serve the static files of your Flask app from Amazon S3',
+    author='Yueran yuan',
+    author_email='yueranyuan@gmail.com',
+    description='Link S3 to your file. Based on flask-s3 by e-dard',
     long_description=__doc__,
-    py_modules=['flask_s3'],
+    py_modules=['flask_s3_custom'],
     zip_safe=False,
     include_package_data=True,
     platforms='any',
