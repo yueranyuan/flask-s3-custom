@@ -358,9 +358,11 @@ def clone(folders, app, **kwargs):
         # if local file already exists, check if the web file has changed
         if os.path.exists(local_path):
             if hashes is None:  # if there are no hashes, then don't write over local files
+                print("file {} already exists and hash file is not available".format(remaining_path))
                 continue
             file_hash = hash_file(local_path)
             if hashes.get(keyString, None) == file_hash:  # hash matches, no need to overwrite
+                print("file {} has the same hash".format(remaining_path))
                 continue
         else:  # if the local file does not exist, check if the folder needs to be created
             local_dir = os.path.dirname(local_path)
