@@ -91,17 +91,20 @@ def url_for(folders, endpoint, **values):
     return flask_url_for(endpoint, **values)
 
 
-def _bp_static_url(blueprint):
+def _bp_static_url(app, blueprint):
     """ builds the absolute url path for a blueprint's static folder """
-    u = u'%s%s' % (blueprint.url_prefix or '', blueprint.static_url_path or '')
+    urls = app.url_map.bind('')
+    u = urls.build("{}.static".format(blueprint.name), values={"filename":""})
+    print(u)
     return u
+
 
 def _get_static_folders(app):
     """ Gets static folders and returns in list of (folder, url) pairs"""
     dirs = [(unicode(app.static_folder), app.static_url_path)]
     if hasattr(app, 'blueprints'):
         blueprints = app.blueprints.values()
-        bp_details = lambda x: (x.static_folder, _bp_static_url(x))
+        bp_details = lambda x: (x.static_folder, _bp_static_url(app, x))
         dirs.extend([bp_details(x) for x in blueprints if x.static_folder])
     return dirs
 
