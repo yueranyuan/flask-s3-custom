@@ -1,4 +1,5 @@
 import os
+import fnmatch
 import logging
 import hashlib
 import json
@@ -66,7 +67,10 @@ def url_for(folders, endpoint, **values):
 
     my_endpoints = [f.endpoint for f in folders]
     ending_endpoint = endpoint.split('.')[-1]
-    if endpoint in my_endpoints or ending_endpoint == 'static':
+    use_s3 = app.config.get('USE_S3')
+    if app.debug:
+        use_s3 = app.config.get('USE_S3_DEBUG') and app.config.get('USE_S3')
+    if endpoint in my_endpoints or ending_endpoint == 'static' and use_s3:
         scheme = 'http'
         if app.config['S3_USE_HTTPS']:
             scheme = 'https'
@@ -151,7 +155,13 @@ def _write_files(app, static_url_loc, static_folder, files, bucket,
     """ Writes all the files inside a static folder to S3. """
     new_hashes = []
     static_folder_rel = _path_to_relative_url(static_folder)
+    ignore_patterns = app.config.get('S3_IGNORE', [])
     for file_path in files:
+        matches = [fnmatch.fnmatch(file_path, ignore_pattern) for ignore_pattern in ignore_patterns]
+        if any(matches):
+            print("ignoring file {}".format(file_path))
+            continue
+
         asset_loc = _path_to_relative_url(file_path)
         key_name = _static_folder_path(static_url_loc, static_folder_rel,
                                        asset_loc).strip('/')
@@ -406,11 +416,13 @@ class FlaskS3(object):
                     ('S3_USE_CACHE_CONTROL', False),
                     ('S3_HEADERS', {}),
                     ('S3_ONLY_MODIFIED', True),
-                    ('S3_URL_STYLE', 'host')]
+                    ('S3_URL_STYLE', 'host'),
+                    ('S3_IGNORE', ['*.js', '*.jsx'])]
 
         for k, v in defaults:
             app.config.setdefault(k, v)
 
+        # note that app.debug might change
         if app.debug and not app.config['USE_S3_DEBUG']:
             app.config['USE_S3'] = False
 
