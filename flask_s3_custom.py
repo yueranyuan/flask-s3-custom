@@ -345,6 +345,9 @@ def clone(folders, app, **kwargs):
         keyString = str(l.key)
         if keyString == '.file-hashes':
             continue
+        if hashes is not None and keyString not in hashes:
+            print("file {} has not been pushed (probably needs to be cleaned up) so won't be downloaded".format(keyString))
+            continue
 
         # find out which local folder to map to
         for folder_local, folder_url in all_folders:
@@ -371,16 +374,17 @@ def clone(folders, app, **kwargs):
                 print("file {} already exists and hash file is not available".format(remaining_path))
                 continue
             file_hash = hash_file(local_path)
-            if hashes.get(keyString, None) == file_hash:  # hash matches, no need to overwrite
+            if hashes.get(keyString) == file_hash:  # hash matches, no need to overwrite
                 print("file {} has the same hash".format(remaining_path))
                 continue
-        else:  # if the local file does not exist, check if the folder needs to be created
+        else:
+            # if the local file does not exist, check if the folder needs to be created
             local_dir = os.path.dirname(local_path)
             if not os.path.exists(local_dir):
                 print("making folder {}".format(local_dir))
                 os.makedirs(local_dir)
         # download the file
-        print("downloading file {}".format(remaining_path))
+        print("downloading file {}".format(keyString))
         l.get_contents_to_filename(local_path)
 
 
